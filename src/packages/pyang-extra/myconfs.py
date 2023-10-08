@@ -3,6 +3,7 @@ Extension for pyang configurations
 	https://github.com/UnivSchool/pylearn/
 """
 
+from sys import stdout
 import os.path
 
 DEBUG = 0
@@ -52,6 +53,8 @@ class OwnPaths:
                 fpath = os.path.join(bdir, path)
                 if os.path.isfile(fpath):
                     new = fpath
+                    if "/" in path:
+                        new = new.replace("\\", "/")
             res.append(new)
         return res
 
@@ -86,3 +89,49 @@ class OwnPaths:
             else:
                 return {}, "Invalid op"
         return dct, ""
+
+
+class Writer(object):
+    """ Multiple file writer. """
+    def __init__(self, name="writer"):
+        self.name = name
+        self.dout = stdout
+        self.alt = None
+        self._lines = []
+
+    def set_text_alt(self, fname:str):
+        if not fname:
+            self.alt = None
+            return False
+        assert isinstance(fname, str), "Should be string"
+        self.alt = fname
+        return True
+
+    def write(self, astr):
+        if self.dout is None:
+            return -1
+        res = self.dout.write(astr)
+        if self.alt is None:
+            return res
+        self._lines.append(astr)
+        return res
+
+    def flush_all(self):
+        if self.alt is None:
+            return False
+        astr = ''.join(self._lines)
+        with open(self.alt, "wb") as fdout:
+            fdout.write(astr.encode("utf-8"))
+        return True
+
+    def __del__(self):
+       self.flush_all()
+
+# Debug tree.py:
+#   s = module ...
+#   [(ala, getattr(s, ala)) for ala in dir(s) if ala[0].isalpha() and hasattr(s, ala)]
+#   or ...
+#   [(callable(getattr(s, ala)), ala, getattr(s, ala)) for ala in dir(s) if ala[0].isalpha() and hasattr(s, ala)]
+# Distinguishing functions:
+#   [(key, val, callable(val)) for key, val in statements.ModSubmodStatement.__dict__.items() if key == "prune"][0]
+#   prune() is a function of a Module class.

@@ -89,8 +89,11 @@ class TreePlugin(plugin.PyangPlugin):
                 path = path[1:]
         else:
             path = None
-        emit_tree(ctx, modules, fd, ctx.opts.tree_depth,
-                  ctx.opts.tree_line_length, path)
+        emit_tree(
+            ctx, modules, fd, (self.opts, ctx.opts.tree_depth),
+            ctx.opts.tree_line_length,
+            path
+        )
 
 def print_help():
     print("""
@@ -135,7 +138,7 @@ Each node is printed as:
     within curly brackets and a question mark "{...}?"
 """)
 
-def emit_tree(ctx, modules, fd, depth, llen, path):
+def emit_tree(ctx, modules, fd, tups:tuple, llen, path):
 
     def print_header(module):
         if not printed_header:
@@ -147,7 +150,8 @@ def emit_tree(ctx, modules, fd, depth, llen, path):
             printed_header.append(None)
 
     printed_header = []
-
+    topts, depth = tups
+    print("DEBUG: topts:", topts["myconf"].confs)
     for module in modules:
         if printed_header:
             fd.write("\n")
@@ -383,9 +387,11 @@ def print_children(i_children, module, fd, prefix, path, mode, depth,
                 mode = 'input'
             elif ch.keyword == 'output':
                 mode = 'output'
-            print_node(ch, module, fd, newprefix, path, mode, depth, llen,
-                       no_expand_uses, width,
-                       prefix_with_modname=prefix_with_modname)
+            print_node(
+                ch, module, fd, newprefix, path, mode, depth, llen,
+                no_expand_uses, width,
+                prefix_with_modname=prefix_with_modname
+            )
 
 def print_node(s, module, fd, prefix, path, mode, depth, llen,
                no_expand_uses, width, prefix_with_modname=False):
@@ -591,3 +597,13 @@ def get_typename(s, prefix_with_modname=False):
         return '<anyxml>'
     else:
         return ''
+
+
+class Trees():
+    """ Special holder """
+    def __init__(self):
+        self._raw = []
+
+    def dbg_dump(self):
+        for idx, elem in enumerate(self._raw, 1):
+            print(f"DBG {idx}: {elem}")
