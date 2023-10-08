@@ -15,6 +15,10 @@ DEF_PATHS = {
     "paths": [],
 }
 
+BOOL_KEYS = {
+    "TREE_META": (False, "Has extra meta HTML files"),
+}
+
 class OwnPaths:
     """ Own modeling paths class! """
     def __init__(self, dct=None, name="basic"):
@@ -29,6 +33,9 @@ class OwnPaths:
 
     def paths(self) -> list:
         return self.confs["paths"]
+
+    def has_meta(self) -> bool:
+        return self.confs["tree_meta"]
 
     def load_config(self, d_or_fname:str):
         """ Load configuration """
@@ -79,7 +86,16 @@ class OwnPaths:
             if not lvar:
                 print("Ignored:", line)
             if oper_eq in ("S",):
-                dct[avar] = [rvar]
+                if lvar in BOOL_KEYS:
+                    my_default, _ = BOOL_KEYS[lvar]
+                    assert rvar in ("True", "False", "*"), lvar
+                    if rvar == "*":
+                        rvar = my_default
+                    else:
+                        rvar = rvar == "True"
+                    dct[avar] = rvar
+                else:
+                    dct[avar] = [rvar]
             elif oper_eq in ("P",):  # Plus...
                 #print("ADDED:", avar, "AS:", rvar)
                 if avar in dct:
@@ -99,11 +115,14 @@ class Writer(object):
         self.alt = None
         self._lines = []
 
-    def set_text_alt(self, fname:str):
+    def set_text_alt(self, fname:str, allow_overide=True):
+        self.alt = None
         if not fname:
-            self.alt = None
             return False
         assert isinstance(fname, str), "Should be string"
+        if not allow_overide:
+            if os.path.isfile(fname):
+                return False
         self.alt = fname
         return True
 
