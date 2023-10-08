@@ -39,6 +39,22 @@ class OwnPaths:
             print("Msg", ":" if msg else ": OK", msg)
         return True
 
+    def from_args(self, args):
+        """ Returns the same paths, or the complete path in case any of the paths is found in basedir().
+        Example: release/models/system/openconfig-alarms.yang is expanded to <BASEDIR>/...
+        """
+        assert isinstance(args, list)
+        res = []
+        bdir = self.basedir()
+        for path in args:
+            new = path
+            if bdir:
+                fpath = os.path.join(bdir, path)
+                if os.path.isfile(fpath):
+                    new = fpath
+            res.append(new)
+        return res
+
     def _reload_config(self, fname) -> tuple:
         dct = {}
         with open(fname, "r", encoding="ascii") as fdin:
