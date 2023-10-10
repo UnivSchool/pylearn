@@ -189,7 +189,7 @@ class YSources(YBaseSource):
 </table>
 """.format(name, astr, idxes)
         astr = HTML_YANG_SKEL.format(name, s_content)
-        with open(outname, "w", encoding="ascii") as fdout:
+        with open(outname, "w", encoding="utf-8") as fdout:
             fdout.write(astr)
         return True
 
