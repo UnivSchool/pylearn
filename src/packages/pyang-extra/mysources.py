@@ -30,7 +30,7 @@ def main_test():
         "system/openconfig-alarms.yang",
         "optical-transport/openconfig-channel-monitor.yang",
     ]
-    is_ok = sources.set_sample_config(file_list)
+    is_ok = sources.set_sample_config(file_list, SAMPLE_OC_DIR)
     print("set_sample_config():", is_ok)
     sources.show()
     for name in file_list:
@@ -76,15 +76,17 @@ class YSources(YBaseSource):
             print(f'nmap["html2path"]["{key}"] = {s_val}')
         return True
 
-    def set_sample_config(self, file_list, html_bdir=None):
+    def set_sample_config(self, file_list, adir:str="", html_bdir=None):
         """ Basic openconfig sampler, to ease this class testing. """
+        assert isinstance(adir, str), "Type?"
         h_bdir = "cache_meta/html" if html_bdir is None else html_bdir
         assert isinstance(h_bdir, str)
         conf = YBaseSource()
         conf.confs = {
             "meta_html_bdir": [h_bdir],
         }
-        path_list = [SAMPLE_OC_DIR + "/" + name for name in file_list]
+        pre = adir + "/" if adir else ""
+        path_list = [pre + name for name in file_list]
         res = self.set_config(conf, file_list, path_list)
         return res
 
