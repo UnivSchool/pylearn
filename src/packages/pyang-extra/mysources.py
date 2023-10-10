@@ -5,7 +5,8 @@ Extension for pyang configurations
 
 import os.path
 
-SAMPLE_OC_DIR = "../anaceo/openconfig_public/release/models"
+#SAMPLE_OC_DIR = "../anaceo/openconfig_public/release/models"
+SAMPLE_OC_DIR = "openconfig/public/release/models"
 
 HTML_YANG_SKEL = """<!DOCTYPE html>
 <html>
